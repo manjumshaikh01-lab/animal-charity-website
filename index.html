@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WildHeart — Animal Charity</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --cream: #f5f0e8;
+      --forest: #1a3a2a;
+      --sage: #4a7c59;
+      --moss: #7aab6e;
+      --gold: #c8922a;
+      --amber: #e8a830;
+      --rust: #c25b3f;
+      --sand: #d4b896;
+      --dark: #0f2018;
+      --light-green: #d6eacb;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--forest);
+      overflow-x: hidden;
+    }
+
+    /* ===== CURSOR ===== */
+    body { cursor: none; }
+    #cursor {
+      width: 14px; height: 14px;
+      background: var(--gold);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s ease, width 0.2s, height 0.2s, background 0.2s;
+      mix-blend-mode: multiply;
+    }
+    #cursor-ring {
+      width: 38px; height: 38px;
+      border: 1.5px solid var(--gold);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: left 0.12s ease, top 0.12s ease, width 0.3s, height 0.3s;
+      opacity: 0.5;
+    }
+
+    /* ===== NAV ===== */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.4rem 4rem;
+      mix-blend-mode: normal;
+      transition: background 0.4s, backdrop-filter 0.4s;
+    }
+    nav.scrolled {
+      background: rgba(245,240,232,0.92);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 2px 30px rgba(26,58,42,0.08);
+    }
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: var(--forest);
+      letter-spacing: -0.02em;
+    }
+    .nav-logo span { color: var(--gold); }
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-links a {
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--forest);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--gold); }
+    .nav-cta {
+      background: var(--forest);
+      color: var(--cream) !important;
+      padding: 0.6rem 1.4rem;
+      border-radius: 100px;
+    }
+    .nav-cta:hover { background: var(--gold); color: var(--dark) !important; }
+
+    /* ===== HERO ===== */
+    #hero {
+      min-height: 100vh;
+      display: flex; align-items: center;
+      position: relative;
+      overflow: hidden;
+      background: var(--forest);
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 70% 50%, #2d5a3d 0%, #1a3a2a 50%, #0f2018 100%);
+    }
+    .hero-noise {
+      position: absolute; inset: 0;
+      opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* Animated circles */
+    .hero-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.25;
+      animation: float 8s ease-in-out infinite;
+    }
+    .orb1 { width: 600px; height: 600px; background: var(--sage); right: -100px; top: -100px; animation-delay: 0s; }
+    .orb2 { width: 400px; height: 400px; background: var(--gold); left: 10%; bottom: 0; animation-delay: -3s; }
+    .orb3 { width: 300px; height: 300px; background: var(--moss); right: 20%; bottom: 10%; animation-delay: -5s; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-40px) scale(1.05); }
+    }
+
+    .hero-content {
+      position: relative; z-index: 2;
+      padding: 0 4rem;
+      max-width: 800px;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(200,146,42,0.2);
+      border: 1px solid rgba(200,146,42,0.4);
+      color: var(--amber);
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.4rem 1rem;
+      border-radius: 100px;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.3s forwards;
+    }
+    .hero-badge::before { content: '🌿'; }
+
+    h1.hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3rem, 7vw, 6rem);
+      font-weight: 900;
+      line-height: 1.05;
+      color: var(--cream);
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.5s forwards;
+    }
+    h1.hero-title em {
+      font-style: italic;
+      color: var(--amber);
+    }
+    .hero-sub {
+      font-size: 1.1rem;
+      color: rgba(245,240,232,0.65);
+      line-height: 1.7;
+      max-width: 520px;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.7s forwards;
+    }
+    .hero-buttons {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.9s forwards;
+    }
+    .btn-primary {
+      background: var(--gold);
+      color: var(--dark);
+      padding: 0.9rem 2rem;
+      border: none;
+      border-radius: 100px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(200,146,42,0.4); }
+    .btn-outline {
+      background: transparent;
+      color: var(--cream);
+      padding: 0.9rem 2rem;
+      border: 1.5px solid rgba(245,240,232,0.3);
+      border-radius: 100px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: none;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-outline:hover { border-color: var(--cream); background: rgba(245,240,232,0.08); }
+
+    /* Scroll indicator */
+    .scroll-hint {
+      position: absolute;
+      bottom: 3rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+      color: rgba(245,240,232,0.4);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0;
+      animation: fadeUp 1s 1.2s forwards;
+    }
+    .scroll-line {
+      width: 1px; height: 50px;
+      background: linear-gradient(to bottom, rgba(245,240,232,0.4), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+    @keyframes scrollPulse {
+      0%, 100% { transform: scaleY(1); opacity: 1; }
+      50% { transform: scaleY(0.6); opacity: 0.4; }
+    }
+
+    /* Hero animals SVG silhouettes */
+    .hero-animals {
+      position: absolute;
+      right: 0; bottom: 0;
+      width: 50%;
+      height: 100%;
+      display: flex; align-items: flex-end;
+      opacity: 0;
+      animation: fadeIn 1.2s 0.6s forwards;
+    }
+    .hero-animals svg { width: 100%; height: auto; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 0.15; }
+    }
+
+    /* ===== STATS BAR ===== */
+    .stats-bar {
+      background: var(--gold);
+      padding: 1.5rem 4rem;
+      display: flex; justify-content: space-around; align-items: center;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    .stat-item { text-align: center; }
+    .stat-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--dark);
+    }
+    .stat-label {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: rgba(15,32,24,0.65);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* ===== SECTION BASE ===== */
+    section { padding: 7rem 4rem; }
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--sage);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 900;
+      line-height: 1.15;
+      color: var(--forest);
+      margin-bottom: 1.5rem;
+    }
+    .section-sub {
+      font-size: 1rem;
+      color: rgba(26,58,42,0.6);
+      line-height: 1.7;
+      max-width: 540px;
+    }
+
+    /* ===== MISSION ===== */
+    #mission {
+      background: var(--cream);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: center;
+    }
+    .mission-visual {
+      position: relative;
+    }
+    .mission-card {
+      background: var(--forest);
+      border-radius: 30px;
+      padding: 3rem;
+      color: var(--cream);
+      position: relative;
+      overflow: hidden;
+    }
+    .mission-card::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(200,146,42,0.3), transparent 70%);
+      border-radius: 50%;
+    }
+    .mission-card-quote {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-style: italic;
+      line-height: 1.4;
+      margin-bottom: 1.5rem;
+    }
+    .mission-card-author { font-size: 0.85rem; color: var(--amber); }
+
+    .mission-stats-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1rem; margin-top: 1.5rem;
+    }
+    .mini-stat {
+      background: rgba(122,171,110,0.12);
+      border: 1px solid rgba(122,171,110,0.2);
+      border-radius: 16px;
+      padding: 1.2rem;
+    }
+    .mini-stat-n {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--moss);
+    }
+    .mini-stat-l { font-size: 0.8rem; color: rgba(245,240,232,0.6); }
+
+    .mission-pillars { display: flex; flex-direction: column; gap: 1.5rem; }
+    .pillar {
+      display: flex; gap: 1.2rem; align-items: flex-start;
+      padding: 1.5rem;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(26,58,42,0.06);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .pillar:hover { transform: translateX(8px); box-shadow: 0 8px 30px rgba(26,58,42,0.1); }
+    .pillar-icon {
+      width: 48px; height: 48px;
+      background: var(--light-green);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+    .pillar-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.3rem; }
+    .pillar-text { font-size: 0.85rem; color: rgba(26,58,42,0.6); line-height: 1.5; }
+
+    /* ===== PROGRAMS ===== */
+    #programs {
+      background: var(--forest);
+    }
+    #programs .section-label { color: var(--moss); }
+    #programs .section-title { color: var(--cream); }
+    #programs .section-sub { color: rgba(245,240,232,0.55); }
+
+    .programs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 4rem;
+    }
+    .program-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      padding: 2.5rem;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+      cursor: none;
+    }
+    .program-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(122,171,110,0.1), transparent);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .program-card:hover { border-color: rgba(122,171,110,0.3); transform: translateY(-8px); }
+    .program-card:hover::before { opacity: 1; }
+
+    .program-emoji {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+      display: block;
+    }
+    .program-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 0.8rem;
+    }
+    .program-text {
+      font-size: 0.88rem;
+      color: rgba(245,240,232,0.55);
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+    .program-tag {
+      display: inline-block;
+      background: rgba(200,146,42,0.15);
+      color: var(--amber);
+      font-size: 0.75rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 100px;
+      font-weight: 500;
+    }
+
+    /* Featured program */
+    .program-card.featured {
+      grid-column: span 2;
+      background: linear-gradient(135deg, rgba(74,124,89,0.3), rgba(26,58,42,0.5));
+      border-color: rgba(122,171,110,0.2);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: center;
+    }
+    .program-card.featured .program-title { font-size: 1.8rem; }
+    .featured-visual {
+      background: rgba(122,171,110,0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+    .progress-item { }
+    .progress-label {
+      display: flex; justify-content: space-between;
+      font-size: 0.8rem;
+      color: rgba(245,240,232,0.7);
+      margin-bottom: 0.4rem;
+    }
+    .progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(to right, var(--moss), var(--amber));
+      border-radius: 100px;
+      transition: width 1.5s ease;
+    }
+
+    /* ===== ANIMALS SHOWCASE ===== */
+    #animals {
+      background: var(--cream);
+      overflow: hidden;
+    }
+    .animals-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 3rem;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+    .animals-scroll-container { overflow: hidden; position: relative; }
+    .animals-track {
+      display: flex;
+      gap: 1.5rem;
+      transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .animal-card {
+      min-width: 280px;
+      background: white;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(26,58,42,0.08);
+      transition: box-shadow 0.3s;
+      flex-shrink: 0;
+    }
+    .animal-card:hover { box-shadow: 0 12px 40px rgba(26,58,42,0.15); }
+    .animal-img {
+      height: 200px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 6rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .animal-img-bg { position: absolute; inset: 0; }
+    .animal-emoji { position: relative; z-index: 1; }
+    .animal-info { padding: 1.5rem; }
+    .animal-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+    .animal-status {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.25rem 0.7rem;
+      border-radius: 100px;
+      margin-bottom: 0.8rem;
+    }
+    .status-critical { background: rgba(194,91,63,0.12); color: var(--rust); }
+    .status-stable { background: rgba(122,171,110,0.15); color: var(--sage); }
+    .status-endangered { background: rgba(200,146,42,0.12); color: var(--gold); }
+    .animal-desc { font-size: 0.83rem; color: rgba(26,58,42,0.6); line-height: 1.6; }
+    .animals-nav {
+      display: flex; gap: 0.8rem; margin-top: 2rem;
+    }
+    .nav-btn {
+      width: 44px; height: 44px;
+      background: var(--forest);
+      color: var(--cream);
+      border: none;
+      border-radius: 50%;
+      cursor: none;
+      font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .nav-btn:hover { background: var(--gold); transform: scale(1.1); }
+
+    /* ===== DONATE ===== */
+    #donate {
+      background: linear-gradient(160deg, #1a3a2a 0%, #0f2018 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    #donate::before {
+      content: '';
+      position: absolute;
+      top: -200px; left: -200px;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(122,171,110,0.12), transparent 70%);
+    }
+    #donate::after {
+      content: '';
+      position: absolute;
+      bottom: -200px; right: -100px;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(200,146,42,0.1), transparent 70%);
+    }
+    .donate-content { position: relative; z-index: 1; }
+    #donate .section-label { color: var(--moss); }
+    #donate .section-title { color: var(--cream); }
+    #donate .section-sub { color: rgba(245,240,232,0.55); margin-bottom: 3rem; }
+
+    .donate-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+
+    /* Donate tiers */
+    .donate-tiers { display: flex; flex-direction: column; gap: 1rem; }
+    .tier {
+      background: rgba(255,255,255,0.04);
+      border: 1.5px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 1.5rem 2rem;
+      display: flex; align-items: center;
+      gap: 1.5rem;
+      cursor: none;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .tier.active, .tier:hover {
+      border-color: var(--gold);
+      background: rgba(200,146,42,0.08);
+    }
+    .tier.popular::before {
+      content: 'Most Popular';
+      position: absolute;
+      top: -1px; right: 1.5rem;
+      background: var(--gold);
+      color: var(--dark);
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 0.2rem 0.7rem;
+      border-radius: 0 0 8px 8px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .tier-icon { font-size: 2rem; }
+    .tier-info { flex: 1; }
+    .tier-name {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--cream);
+      margin-bottom: 0.25rem;
+    }
+    .tier-impact { font-size: 0.82rem; color: rgba(245,240,232,0.5); }
+    .tier-amount {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--amber);
+    }
+    .tier-freq { font-size: 0.75rem; color: rgba(245,240,232,0.4); }
+
+    /* Donate form panel */
+    .donate-panel {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 28px;
+      padding: 2.5rem;
+    }
+    .donate-panel h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--cream);
+      margin-bottom: 0.5rem;
+    }
+    .donate-panel p { font-size: 0.85rem; color: rgba(245,240,232,0.5); margin-bottom: 2rem; }
+
+    .custom-amount {
+      background: rgba(255,255,255,0.06);
+      border: 1.5px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      padding: 1rem 1.5rem;
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .currency { font-size: 1.2rem; color: var(--amber); font-weight: 500; }
+    .custom-amount input {
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--cream);
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      width: 100%;
+    }
+    .custom-amount input::placeholder { color: rgba(245,240,232,0.2); }
+
+    .freq-toggle {
+      display: flex;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 0.3rem;
+      margin-bottom: 1.5rem;
+    }
+    .freq-btn {
+      flex: 1;
+      text-align: center;
+      padding: 0.6rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: rgba(245,240,232,0.5);
+      cursor: none;
+      transition: all 0.2s;
+    }
+    .freq-btn.active {
+      background: var(--gold);
+      color: var(--dark);
+      font-weight: 600;
+    }
+
+    .impact-preview {
+      background: rgba(122,171,110,0.1);
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+      color: rgba(245,240,232,0.7);
+      line-height: 1.5;
+    }
+    .impact-preview strong { color: var(--moss); }
+
+    .donate-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--gold), var(--amber));
+      color: var(--dark);
+      border: none;
+      border-radius: 14px;
+      padding: 1.1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .donate-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(200,146,42,0.4); }
+
+    .secure-note {
+      text-align: center;
+      font-size: 0.75rem;
+      color: rgba(245,240,232,0.3);
+      margin-top: 1rem;
+    }
+
+    /* ===== IMPACT TIMELINE ===== */
+    #impact {
+      background: var(--cream);
+    }
+    .timeline {
+      position: relative;
+      margin-top: 4rem;
+      padding-left: 3rem;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--sage), transparent);
+    }
+    .timeline-item {
+      position: relative;
+      padding-bottom: 3rem;
+      opacity: 0;
+      transform: translateX(-20px);
+      transition: all 0.6s ease;
+    }
+    .timeline-item.visible { opacity: 1; transform: translateX(0); }
+    .timeline-dot {
+      position: absolute;
+      left: -3.4rem;
+      top: 0.3rem;
+      width: 16px; height: 16px;
+      background: var(--sage);
+      border-radius: 50%;
+      border: 3px solid var(--cream);
+      box-shadow: 0 0 0 3px rgba(74,124,89,0.3);
+    }
+    .timeline-year {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--sage);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.3rem;
+    }
+    .timeline-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .timeline-text { font-size: 0.88rem; color: rgba(26,58,42,0.6); line-height: 1.6; max-width: 500px; }
+
+    /* ===== VOLUNTEER ===== */
+    #volunteer {
+      background: var(--light-green);
+      text-align: center;
+    }
+    .volunteer-cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+    .vol-card {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem 1.5rem;
+      transition: all 0.3s;
+    }
+    .vol-card:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(26,58,42,0.12); }
+    .vol-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+    .vol-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .vol-text { font-size: 0.83rem; color: rgba(26,58,42,0.6); line-height: 1.5; }
+
+    /* ===== NEWSLETTER ===== */
+    .newsletter-banner {
+      background: var(--gold);
+      padding: 3rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    .newsletter-text h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 0.3rem;
+    }
+    .newsletter-text p { font-size: 0.9rem; color: rgba(15,32,24,0.65); }
+    .newsletter-form {
+      display: flex; gap: 0.8rem;
+    }
+    .newsletter-form input {
+      background: rgba(15,32,24,0.1);
+      border: 1.5px solid rgba(15,32,24,0.15);
+      border-radius: 100px;
+      padding: 0.8rem 1.5rem;
+      font-size: 0.9rem;
+      outline: none;
+      min-width: 260px;
+      color: var(--dark);
+    }
+    .newsletter-form input::placeholder { color: rgba(15,32,24,0.4); }
+    .newsletter-form button {
+      background: var(--forest);
+      color: var(--cream);
+      border: none;
+      border-radius: 100px;
+      padding: 0.8rem 1.8rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: none;
+      transition: all 0.2s;
+    }
+    .newsletter-form button:hover { background: var(--dark); }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: var(--dark);
+      padding: 4rem 4rem 2rem;
+      color: var(--cream);
+    }
+    .footer-top {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 3rem;
+      margin-bottom: 3rem;
+    }
+    .footer-brand .nav-logo { font-size: 1.8rem; margin-bottom: 1rem; }
+    .footer-brand p { font-size: 0.85rem; color: rgba(245,240,232,0.45); line-height: 1.6; max-width: 280px; }
+    .footer-social { display: flex; gap: 0.8rem; margin-top: 1.5rem; }
+    .social-btn {
+      width: 36px; height: 36px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem;
+      cursor: none;
+      transition: background 0.2s;
+      text-decoration: none;
+    }
+    .social-btn:hover { background: var(--gold); }
+    .footer-col h4 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(245,240,232,0.5);
+      margin-bottom: 1.2rem;
+    }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 0.7rem; }
+    .footer-col a {
+      text-decoration: none;
+      font-size: 0.88rem;
+      color: rgba(245,240,232,0.6);
+      transition: color 0.2s;
+    }
+    .footer-col a:hover { color: var(--amber); }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 1.5rem;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.8rem;
+      color: rgba(245,240,232,0.3);
+    }
+
+    /* ===== ANIMATIONS ===== */
+    .reveal {
+      opacity: 0; transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 900px) {
+      nav { padding: 1rem 2rem; }
+      .nav-links { display: none; }
+      section { padding: 5rem 2rem; }
+      #mission { grid-template-columns: 1fr; gap: 3rem; }
+      .programs-grid { grid-template-columns: 1fr; }
+      .program-card.featured { grid-column: span 1; grid-template-columns: 1fr; }
+      .donate-layout { grid-template-columns: 1fr; }
+      .volunteer-cards { grid-template-columns: 1fr 1fr; }
+      .footer-top { grid-template-columns: 1fr 1fr; }
+      .hero-animals { display: none; }
+      .stats-bar { padding: 1.5rem 2rem; }
+      .newsletter-banner { padding: 2rem; }
+      .newsletter-form { flex-direction: column; }
+      .newsletter-form input { min-width: unset; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <div class="nav-logo">Wild<span>Heart</span></div>
+  <ul class="nav-links">
+    <li><a href="#mission">Mission</a></li>
+    <li><a href="#programs">Programs</a></li>
+    <li><a href="#animals">Animals</a></li>
+    <li><a href="#impact">Impact</a></li>
+    <li><a href="#donate" class="nav-cta">Donate Now</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-noise"></div>
+  <div class="hero-orb orb1"></div>
+  <div class="hero-orb orb2"></div>
+  <div class="hero-orb orb3"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">Protecting wildlife since 2009</div>
+    <h1 class="hero-title">
+      Every life<br>
+      <em>deserves</em><br>
+      a wild heart.
+    </h1>
+    <p class="hero-sub">
+      We rescue, rehabilitate, and advocate for animals across the globe.
+      Join 40,000+ supporters giving endangered species a fighting chance.
+    </p>
+    <div class="hero-buttons">
+      <a href="#donate" class="btn-primary">Donate Today</a>
+      <a href="#programs" class="btn-outline">Our Programs</a>
+    </div>
+  </div>
+
+  <div class="hero-animals">
+    <svg viewBox="0 0 600 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Elephant silhouette -->
+      <ellipse cx="160" cy="380" rx="120" ry="80" fill="white"/>
+      <ellipse cx="170" cy="310" rx="70" ry="65" fill="white"/>
+      <ellipse cx="218" cy="270" rx="35" ry="22" fill="white" transform="rotate(-20 218 270)"/>
+      <rect x="80" y="420" width="30" height="80" rx="15" fill="white"/>
+      <rect x="120" y="420" width="30" height="80" rx="15" fill="white"/>
+      <rect x="165" y="420" width="30" height="80" rx="15" fill="white"/>
+      <rect x="210" y="420" width="30" height="80" rx="15" fill="white"/>
+      <path d="M218 280 Q240 320 230 360" stroke="white" stroke-width="14" fill="none" stroke-linecap="round"/>
+      <!-- Bird -->
+      <path d="M380 120 Q400 100 430 120 Q400 110 380 120Z" fill="white"/>
+      <path d="M430 120 Q460 100 490 120 Q460 110 430 120Z" fill="white"/>
+      <!-- Trees -->
+      <rect x="480" y="300" width="16" height="200" fill="white"/>
+      <ellipse cx="488" cy="280" rx="45" ry="60" fill="white"/>
+      <rect x="540" y="340" width="12" height="160" fill="white"/>
+      <ellipse cx="546" cy="320" rx="35" ry="48" fill="white"/>
+    </svg>
+  </div>
+
+  <div class="scroll-hint">
+    Scroll
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <div class="stat-number" data-target="12400">0</div>
+    <div class="stat-label">Animals Rescued</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number" data-target="340">0</div>
+    <div class="stat-label">Species Protected</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number" data-target="92">0</div>
+    <div class="stat-label">Countries Active</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number" data-suffix="M">$8.2M</div>
+    <div class="stat-label">Funds Raised 2024</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number" data-target="40000">0</div>
+    <div class="stat-label">Supporters Worldwide</div>
+  </div>
+</div>
+
+<!-- MISSION -->
+<section id="mission">
+  <div class="mission-visual reveal">
+    <div class="mission-card">
+      <div class="mission-card-quote">
+        "The greatness of a nation can be judged by the way its animals are treated."
+      </div>
+      <div class="mission-card-author">— WildHeart Charter, 2009</div>
+      <div class="mission-stats-grid">
+        <div class="mini-stat">
+          <div class="mini-stat-n">98%</div>
+          <div class="mini-stat-l">Rehabilitation success rate</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-n">6</div>
+          <div class="mini-stat-l">Continents covered</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-n">15yr</div>
+          <div class="mini-stat-l">Years of impact</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-n">200+</div>
+          <div class="mini-stat-l">Partner organizations</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="reveal">
+    <p class="section-label">Our Mission</p>
+    <h2 class="section-title">A world where wildlife<br>thrives alongside us.</h2>
+    <p class="section-sub">WildHeart exists to bridge the gap between human development and animal welfare — through rescue, advocacy, education, and habitat restoration.</p>
+
+    <div class="mission-pillars" style="margin-top: 2.5rem;">
+      <div class="pillar">
+        <div class="pillar-icon">🐾</div>
+        <div>
+          <div class="pillar-title">Rescue & Rehabilitation</div>
+          <div class="pillar-text">24/7 emergency response teams operating in 92 countries to rescue injured and endangered animals.</div>
+        </div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">🌍</div>
+        <div>
+          <div class="pillar-title">Habitat Restoration</div>
+          <div class="pillar-text">Restoring natural ecosystems and creating safe corridors for wildlife migration and breeding.</div>
+        </div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">🔬</div>
+        <div>
+          <div class="pillar-title">Research & Advocacy</div>
+          <div class="pillar-text">Science-led policy work pushing for stronger wildlife protection laws internationally.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROGRAMS -->
+<section id="programs">
+  <div class="reveal">
+    <p class="section-label">What We Do</p>
+    <h2 class="section-title">Programs built to last.</h2>
+    <p class="section-sub">From oceans to forests, our programs target the most critical areas where animal welfare and habitat intersect.</p>
+  </div>
+
+  <div class="programs-grid reveal">
+    <div class="program-card featured">
+      <div>
+        <span class="program-emoji">🐘</span>
+        <div class="program-title">Elephant Sanctuary Network</div>
+        <p class="program-text">Our flagship program across 14 African nations — providing safe havens for rescued elephants while training local rangers in wildlife protection.</p>
+        <span class="program-tag">Flagship Program</span>
+      </div>
+      <div class="featured-visual">
+        <div class="progress-item">
+          <div class="progress-label"><span>Elephants protected</span><span>847 / 1,000</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width: 84%"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-label"><span>Sanctuaries built</span><span>11 / 14</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width: 78%"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-label"><span>Rangers trained</span><span>620 / 700</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width: 88%"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-label"><span>2024 Goal</span><span>72%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width: 72%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="program-card">
+      <span class="program-emoji">🐋</span>
+      <div class="program-title">Ocean Guardians</div>
+      <p class="program-text">Protecting marine mammals from illegal fishing, plastic pollution, and climate threats through ocean monitoring fleets.</p>
+      <span class="program-tag">Marine</span>
+    </div>
+
+    <div class="program-card">
+      <span class="program-emoji">🦁</span>
+      <div class="program-title">Big Cat Rescue</div>
+      <p class="program-text">Rehabilitating lions, tigers, and leopards from illegal captivity and conflict zones, returning them to the wild.</p>
+      <span class="program-tag">Feline</span>
+    </div>
+
+    <div class="program-card">
+      <span class="program-emoji">🦜</span>
+      <div class="program-title">Rainforest Birds</div>
+      <p class="program-text">Anti-poaching tech deployments and breeding programs for critically endangered Amazonian bird species.</p>
+      <span class="program-tag">Avian</span>
+    </div>
+
+    <div class="program-card">
+      <span class="program-emoji">🐢</span>
+      <div class="program-title">Sea Turtle Watch</div>
+      <p class="program-text">Global beach patrol and hatchery programs protecting nesting sea turtles across 40 coastlines.</p>
+      <span class="program-tag">Reptile</span>
+    </div>
+  </div>
+</section>
+
+<!-- ANIMALS IN CARE -->
+<section id="animals">
+  <div class="animals-header reveal">
+    <div>
+      <p class="section-label">Meet Them</p>
+      <h2 class="section-title">Animals in our care.</h2>
+    </div>
+    <p style="font-size: 0.9rem; color: rgba(26,58,42,0.55); max-width: 340px; line-height: 1.6;">
+      Every animal has a story. Here are some of the remarkable creatures we're working to protect right now.
+    </p>
+  </div>
+
+  <div class="animals-scroll-container reveal">
+    <div class="animals-track" id="animalsTrack">
+
+      <div class="animal-card">
+        <div class="animal-img">
+          <div class="animal-img-bg" style="background: linear-gradient(135deg, #d6eacb, #7aab6e33)"></div>
+          <span class="animal-emoji">🐘</span>
+        </div>
+        <div class="animal-info">
+          <div class="animal-name">Amara</div>
+          <div class="animal-status status-stable">● Stable</div>
+          <p class="animal-desc">A 4-year-old elephant rescued from a poaching trap in Kenya. Amara is thriving at our Nairobi sanctuary.</p>
+        </div>
+      </div>
+
+      <div class="animal-card">
+        <div class="animal-img">
+          <div class="animal-img-bg" style="background: linear-gradient(135deg, #fde8c8, #c8922a33)"></div>
+          <span class="animal-emoji">🦁</span>
+        </div>
+        <div class="animal-info">
+          <div class="animal-name">Kano</div>
+          <div class="animal-status status-critical">● Critical Care</div>
+          <p class="animal-desc">Rescued from an illegal zoo in Southeast Asia. Kano is undergoing rehabilitation to return to the wild.</p>
+        </div>
+      </div>
+
+      <div class="animal-card">
+        <div class="animal-img">
+          <div class="animal-img-bg" style="background: linear-gradient(135deg, #cce4f5, #2a6ea633)"></div>
+          <span class="animal-emoji">🐋</span>
+        </div>
+        <div class="animal-info">
+          <div class="animal-name">Luna</div>
+          <div class="animal-status status-stable">● Stable</div>
+          <p class="animal-desc">A humpback whale freed from ghost nets off the coast of Norway. Now tagged and monitored in the Atlantic.</p>
+        </div>
+      </div>
+
+      <div class="animal-card">
+        <div class="animal-img">
+          <div class="animal-img-bg" style="background: linear-gradient(135deg, #ffe8d6, #c25b3f33)"></div>
+          <span class="animal-emoji">🦊</span>
+        </div>
+        <div class="animal-info">
+          <div class="animal-name">Rue</div>
+          <div class="animal-status status-endangered">● Endangered</div>
+          <p class="animal-desc">One of only 300 remaining red wolves, Rue is part of our captive breeding program in North Carolina.</p>
+        </div>
+      </div>
+
+      <div class="animal-card">
+        <div class="animal-img">
+          <div class="animal-img-bg" style="background: linear-gradient(135deg, #e8d6f5, #8a2be233)"></div>
+          <span class="animal-emoji">🦜</span>
+        </div>
+        <div class="animal-info">
+          <div class="animal-name">Miro</div>
+          <div class="animal-status status-critical">● Critical Care</div>
+          <p class="animal-desc">A Spix's macaw — one of the rarest birds on Earth — recovered from an illegal smuggling ring.</p>
+        </div>
+      </div>
+
+      <div class="animal-card">
+        <div class="animal-img">
+          <div class="animal-img-bg" style="background: linear-gradient(135deg, #d6f5e8, #2abc7033)"></div>
+          <span class="animal-emoji">🐢</span>
+        </div>
+        <div class="animal-info">
+          <div class="animal-name">Coral</div>
+          <div class="animal-status status-stable">● Stable</div>
+          <p class="animal-desc">A leatherback sea turtle fitted with a satellite tracker after recovering from boat propeller injuries in Bali.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="animals-nav reveal">
+    <button class="nav-btn" id="prevBtn">←</button>
+    <button class="nav-btn" id="nextBtn">→</button>
+  </div>
+</section>
+
+<!-- DONATE -->
+<section id="donate">
+  <div class="donate-content">
+    <p class="section-label">Give Today</p>
+    <h2 class="section-title">Your gift saves lives.</h2>
+    <p class="section-sub">Every dollar goes directly to animal care, habitat protection, and field operations. Join thousands of monthly donors making a lasting difference.</p>
+
+    <div class="donate-layout">
+      <div>
+        <div class="donate-tiers reveal">
+          <div class="tier" data-amount="15" onclick="setDonation(15)">
+            <div class="tier-icon">🌱</div>
+            <div class="tier-info">
+              <div class="tier-name">Seedling</div>
+              <div class="tier-impact">Feeds one rescue animal for a week</div>
+            </div>
+            <div>
+              <div class="tier-amount">$15</div>
+              <div class="tier-freq">/month</div>
+            </div>
+          </div>
+          <div class="tier popular active" data-amount="50" onclick="setDonation(50)">
+            <div class="tier-icon">🌿</div>
+            <div class="tier-info">
+              <div class="tier-name">Guardian</div>
+              <div class="tier-impact">Sponsors medical care for one animal</div>
+            </div>
+            <div>
+              <div class="tier-amount">$50</div>
+              <div class="tier-freq">/month</div>
+            </div>
+          </div>
+          <div class="tier" data-amount="150" onclick="setDonation(150)">
+            <div class="tier-icon">🌳</div>
+            <div class="tier-info">
+              <div class="tier-name">Protector</div>
+              <div class="tier-impact">Funds a ranger's training for one month</div>
+            </div>
+            <div>
+              <div class="tier-amount">$150</div>
+              <div class="tier-freq">/month</div>
+            </div>
+          </div>
+          <div class="tier" data-amount="500" onclick="setDonation(500)">
+            <div class="tier-icon">🏔️</div>
+            <div class="tier-info">
+              <div class="tier-name">Champion</div>
+              <div class="tier-impact">Establishes a new sanctuary outpost</div>
+            </div>
+            <div>
+              <div class="tier-amount">$500</div>
+              <div class="tier-freq">/month</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="donate-panel reveal">
+        <h3>Complete Your Gift</h3>
+        <p>Secure, tax-deductible donation</p>
+
+        <div class="custom-amount">
+          <span class="currency">$</span>
+          <input type="number" id="donationInput" placeholder="50" value="50" oninput="updateImpact()"/>
+        </div>
+
+        <div class="freq-toggle">
+          <div class="freq-btn active" onclick="setFreq(this, 'Monthly')">Monthly</div>
+          <div class="freq-btn" onclick="setFreq(this, 'Quarterly')">Quarterly</div>
+          <div class="freq-btn" onclick="setFreq(this, 'One-time')">One-time</div>
+        </div>
+
+        <div class="impact-preview" id="impactPreview">
+          <strong>Your $50/month</strong> will cover full medical care for one rescued animal every month — that's 12 animals healed per year. 🐾
+        </div>
+
+        <button class="donate-btn" onclick="handleDonate()">
+          Donate $50 Monthly →
+        </button>
+
+        <p class="secure-note">🔒 Secured by Stripe · 100% goes to animals · Cancel anytime</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- IMPACT TIMELINE -->
+<section id="impact">
+  <p class="section-label reveal">Our Journey</p>
+  <h2 class="section-title reveal">15 years of impact.</h2>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-year">2009</div>
+      <div class="timeline-title">WildHeart Founded</div>
+      <p class="timeline-text">Three veterinarians and a wildlife biologist launch WildHeart from a converted barn in Montana, rescuing their first 12 animals.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-year">2013</div>
+      <div class="timeline-title">First International Sanctuary</div>
+      <p class="timeline-text">Opened our first overseas facility in Kenya, becoming the first US charity to operate an elephant sanctuary on African soil.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-year">2016</div>
+      <div class="timeline-title">UN Partnership Formed</div>
+      <p class="timeline-text">Officially recognized as an NGO partner by the UNEP, bringing WildHeart into global conservation policy discussions.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-year">2020</div>
+      <div class="timeline-title">10,000 Animals Milestone</div>
+      <p class="timeline-text">Celebrated rescuing our 10,000th animal — a snow leopard named Frost, found injured in Nepal.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-year">2024</div>
+      <div class="timeline-title">Ocean Guardians Launch</div>
+      <p class="timeline-text">Launched our marine division with a fleet of 8 monitoring vessels, expanding our reach to protect ocean biodiversity.</p>
+    </div>
+  </div>
+</section>
+
+<!-- VOLUNTEER -->
+<section id="volunteer">
+  <p class="section-label reveal">Get Involved</p>
+  <h2 class="section-title reveal">More ways to help.</h2>
+
+  <div class="volunteer-cards reveal">
+    <div class="vol-card">
+      <div class="vol-icon">🏕️</div>
+      <div class="vol-title">Field Volunteer</div>
+      <p class="vol-text">Join our teams on the ground in Africa, Asia, or South America. No experience needed — just passion.</p>
+    </div>
+    <div class="vol-card">
+      <div class="vol-icon">📱</div>
+      <div class="vol-title">Digital Advocate</div>
+      <p class="vol-text">Share our campaigns, create content, and mobilize your community online to spread awareness.</p>
+    </div>
+    <div class="vol-card">
+      <div class="vol-icon">🎓</div>
+      <div class="vol-title">Education Partner</div>
+      <p class="vol-text">Bring WildHeart into classrooms — our curriculum kits are free for any teacher worldwide.</p>
+    </div>
+    <div class="vol-card">
+      <div class="vol-icon">🤝</div>
+      <div class="vol-title">Corporate Partner</div>
+      <p class="vol-text">Match employee donations, sponsor a program, or co-brand your next campaign with WildHeart.</p>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<div class="newsletter-banner">
+  <div class="newsletter-text">
+    <h3>Stay close to the wild.</h3>
+    <p>Monthly stories, rescue updates, and ways to help — straight to your inbox.</p>
+  </div>
+  <div class="newsletter-form">
+    <input type="email" placeholder="Your email address" id="emailInput"/>
+    <button onclick="subscribeNewsletter()">Subscribe</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="nav-logo">Wild<span>Heart</span></div>
+      <p>We believe every animal deserves a life lived freely. Join us in making that a reality — one rescue at a time.</p>
+      <div class="footer-social">
+        <a href="#" class="social-btn">🐦</a>
+        <a href="#" class="social-btn">📷</a>
+        <a href="#" class="social-btn">👥</a>
+        <a href="#" class="social-btn">▶️</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Programs</h4>
+      <ul>
+        <li><a href="#">Elephant Sanctuary</a></li>
+        <li><a href="#">Ocean Guardians</a></li>
+        <li><a href="#">Big Cat Rescue</a></li>
+        <li><a href="#">Sea Turtle Watch</a></li>
+        <li><a href="#">Rainforest Birds</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Get Involved</h4>
+      <ul>
+        <li><a href="#">Donate</a></li>
+        <li><a href="#">Volunteer</a></li>
+        <li><a href="#">Corporate Giving</a></li>
+        <li><a href="#">Legacy Gifts</a></li>
+        <li><a href="#">Fundraise</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>About</h4>
+      <ul>
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#">Team</a></li>
+        <li><a href="#">Financials</a></li>
+        <li><a href="#">Press</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 WildHeart Animal Charity. All rights reserved.</span>
+    <span>Registered 501(c)(3) · EIN: 47-XXXXXXX</span>
+  </div>
+</footer>
+
+<script>
+  // ===== CURSOR =====
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+    ring.style.left = e.clientX + 'px';
+    ring.style.top = e.clientY + 'px';
+  });
+  document.querySelectorAll('a, button, .tier, .program-card, .vol-card').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.width = '22px';
+      cursor.style.height = '22px';
+      cursor.style.background = 'var(--rust)';
+      ring.style.width = '56px';
+      ring.style.height = '56px';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.width = '14px';
+      cursor.style.height = '14px';
+      cursor.style.background = 'var(--gold)';
+      ring.style.width = '38px';
+      ring.style.height = '38px';
+    });
+  });
+
+  // ===== NAVBAR SCROLL =====
+  const nav = document.getElementById('main-nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // ===== COUNTER ANIMATION =====
+  function animateCounter(el, target) {
+    let start = 0;
+    const duration = 1800;
+    const step = target / (duration / 16);
+    const timer = setInterval(() => {
+      start += step;
+      if (start >= target) {
+        start = target;
+        clearInterval(timer);
+      }
+      el.textContent = Math.floor(start).toLocaleString();
+    }, 16);
+  }
+
+  const statsObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        document.querySelectorAll('[data-target]').forEach(el => {
+          animateCounter(el, parseInt(el.dataset.target));
+        });
+        statsObserver.disconnect();
+      }
+    });
+  }, { threshold: 0.5 });
+  const statsBar = document.querySelector('.stats-bar');
+  if (statsBar) statsObserver.observe(statsBar);
+
+  // ===== SCROLL REVEAL =====
+  const revealObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal, .timeline-item').forEach(el => revealObserver.observe(el));
+
+  // ===== ANIMALS CAROUSEL =====
+  let slideIndex = 0;
+  const track = document.getElementById('animalsTrack');
+  const cards = track.querySelectorAll('.animal-card');
+  const cardW = 296; // 280 + 16 gap
+
+  function updateCarousel() {
+    track.style.transform = `translateX(-${slideIndex * cardW}px)`;
+  }
+  document.getElementById('nextBtn').onclick = () => {
+    if (slideIndex < cards.length - 3) slideIndex++;
+    updateCarousel();
+  };
+  document.getElementById('prevBtn').onclick = () => {
+    if (slideIndex > 0) slideIndex--;
+    updateCarousel();
+  };
+
+  // ===== DONATE LOGIC =====
+  function setDonation(amount) {
+    document.getElementById('donationInput').value = amount;
+    document.querySelectorAll('.tier').forEach(t => t.classList.remove('active'));
+    const matching = document.querySelector(`.tier[data-amount="${amount}"]`);
+    if (matching) matching.classList.add('active');
+    updateImpact();
+  }
+
+  function setFreq(btn, freq) {
+    document.querySelectorAll('.freq-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    updateImpact();
+  }
+
+  const impactMessages = {
+    range: [
+      [1, 14, "covers a meal for one rescue animal 🥗"],
+      [15, 49, "provides medical supplies for a week of animal care 💊"],
+      [50, 149, "funds full medical treatment for one rescued animal 🐾"],
+      [150, 499, "sponsors a wildlife ranger's monthly training 🌿"],
+      [500, 9999, "helps establish a new sanctuary outpost for dozens of animals 🏕️"]
+    ]
+  };
+
+  function updateImpact() {
+    const amount = parseInt(document.getElementById('donationInput').value) || 0;
+    const freq = document.querySelector('.freq-btn.active')?.textContent || 'Monthly';
+    const preview = document.getElementById('impactPreview');
+    const donate_btn = document.querySelector('.donate-btn');
+
+    let msg = "makes a wonderful contribution to animal welfare ❤️";
+    for (const [min, max, text] of impactMessages.range) {
+      if (amount >= min && amount <= max) { msg = text; break; }
+    }
+
+    preview.innerHTML = `<strong>Your $${amount} ${freq.toLowerCase()} gift</strong> ${msg}`;
+    if (donate_btn) donate_btn.textContent = `Donate $${amount} ${freq} →`;
+  }
+
+  function handleDonate() {
+    const amount = document.getElementById('donationInput').value;
+    alert(`Thank you for your generous $${amount} donation! 🐾\n\nIn a real implementation, this would open a secure Stripe payment page.\n\nYou're helping protect our wild world.`);
+  }
+
+  function subscribeNewsletter() {
+    const email = document.getElementById('emailInput').value;
+    if (email && email.includes('@')) {
+      alert(`Thank you for subscribing with ${email}! 🌿\nWe'll send you monthly wildlife stories and updates.`);
+      document.getElementById('emailInput').value = '';
+    } else {
+      alert('Please enter a valid email address.');
+    }
+  }
+
+  // Init
+  updateImpact();
+</script>
+</body>
+</html>
